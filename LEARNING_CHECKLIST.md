@@ -1,45 +1,46 @@
 # Session Deep-Understanding Checklist
 
 ## Stage 1 — The Problem
-- [ ] What a prediction market is and why it needs an oracle
-- [ ] Why the oracle problem is hard (the "real world → blockchain" gap)
-- [ ] How UMA's optimistic oracle works (propose → dispute window → finalize)
-- [ ] Why UMA's approach is slow (and when slow is fine vs. not fine)
-- [ ] Why 1–2 hour settlement is a bad fit for this use case
+- [x] What a prediction market is and why it needs an oracle
+- [x] Why the oracle problem is hard (the "real world → blockchain" gap)
+- [x] How UMA's optimistic oracle works (propose → dispute window → finalize)
+- [x] Why UMA's approach is slow (and when slow is fine vs. not fine)
+- [x] Why 1–2 hour settlement is a bad fit for this use case
 
 ## Stage 2 — The Solution: Chainlink CRE
-- [ ] What a DON is and why decentralization matters
-- [ ] What CRE is and how it differs from Chainlink Functions / Automation
-- [ ] The five-step resolution loop (cron → read → fetch → agree → sign → write)
-- [ ] What `ConsensusAggregationByFields(identical)` actually does
-- [ ] What the KeystoneForwarder is and why it exists
-- [ ] Why cryptographic trust beats economic (dispute) trust here
+- [x] What a DON is and why decentralization matters
+- [x] What CRE is and how it differs from Chainlink Functions / Automation
+- [x] The five-step resolution loop (cron → read → fetch → agree → sign → write)
+- [x] What `ConsensusAggregationByFields(identical)` actually does
+- [x] What the KeystoneForwarder is and why it exists
+- [x] Why cryptographic trust beats economic (dispute) trust here
+- [x] Why CRE reads at LAST_FINALIZED_BLOCK_NUMBER (reorg safety)
 
 ## Stage 3 — The Smart Contract
-- [ ] `PredictionMarket.sol` lifecycle: create → bet → resolve → claim
-- [ ] Parimutuel payout math (how winners are paid from the losing pool)
-- [ ] `onReport` / `_processReport` — who calls it and how
-- [ ] Edge case: auto-void when winning side has zero stake
-- [ ] Edge case: `Invalid` outcome → full refunds, no fee
-- [ ] Edge case: `voidMarket()` owner safety valve (7-day window)
-- [ ] Security: `onlyForwarder`, `nonReentrant`, `immutable` forwarder
+- [x] `PredictionMarket.sol` lifecycle: create → bet → resolve → claim
+- [x] Parimutuel payout math (how winners are paid from the losing pool)
+- [x] `onReport` / `_processReport` — who calls it and how
+- [x] Edge case: auto-void when winning side has zero stake → zero fee
+- [x] Edge case: `Invalid` outcome → full refunds, zero fee
+- [x] Edge case: `voidMarket()` 7-day delay prevents owner gaming outcomes
+- [x] Security: `onlyForwarder`, `nonReentrant`, `immutable` forwarder
 
 ## Stage 4 — The CRE Workflow Code
-- [ ] Why TypeScript → WASM (Javy/QuickJS) and what that limits
-- [ ] Why exported functions can't have parameters in Javy WASM
-- [ ] Why `lib.ts` and `main.ts` are separated
-- [ ] How `EVMClient.callContract` reads on-chain data
-- [ ] How `HTTPClient.sendRequest` with consensus works
-- [ ] `LAST_FINALIZED_BLOCK_NUMBER` — what it is and why it matters
-- [ ] `prepareReportRequest` and `runtime.report` — signing flow
-- [ ] `EVMClient.writeReport` — what actually hits the chain
+- [x] Why TypeScript → WASM (Javy/QuickJS) and what that limits
+- [x] Why exported functions can't have parameters in Javy WASM
+- [x] Why `lib.ts` and `main.ts` are separated
+- [x] How `EVMClient.callContract` reads on-chain data
+- [x] How `HTTPClient.sendRequest` with consensus works
+- [x] `LAST_FINALIZED_BLOCK_NUMBER` — what it is and why it matters
+- [x] `prepareReportRequest` and `runtime.report` — signing flow
+- [x] `EVMClient.writeReport` — what actually hits the chain
 
 ## Stage 5 — Broader Context
-- [ ] What this pattern unlocks for DeFi beyond prediction markets
-- [ ] The trust hierarchy: DON → data source → relay
-- [ ] Why the relay normalizing the API matters for consensus
-- [ ] What needs to change to go from local dev to Sepolia to mainnet
-- [ ] Security notes: what the owner can do and why that needs a timelock
+- [x] What this pattern unlocks for DeFi beyond prediction markets
+- [x] The trust hierarchy: DON → data source → relay
+- [x] Why the relay normalizing the API matters for consensus
+- [x] What needs to change to go from local dev to Sepolia to mainnet
+- [x] Security notes: what the owner can do and why that needs a timelock
 
 ---
-**Progress:** Stage 1 of 5 | Not started
+**Progress:** All 5 stages ✅ COMPLETE

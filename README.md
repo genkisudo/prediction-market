@@ -43,6 +43,19 @@ sign a report, and write it onchain** — exactly the trust model a prediction-m
 - **Tamper-evident payout.** The contract only accepts reports relayed by the `KeystoneForwarder`,
   so settlement can't be forged.
 
+This is a general-purpose pattern, not a sports-specific one. RWA lending and automated
+rebalancing use this exact same five-step loop: DON fetches real-world data → consensus → signed
+report → contract acts. Sports outcomes are just one instance.
+
+### Why not Hyperliquid HIP-4?
+
+Hyperliquid's HIP-4 outcome markets sidestep the oracle problem entirely — settlement resolves
+against Hyperliquid's own internal mark price (e.g. BTC at 06:00 UTC daily), so no external data
+fetch is needed. That works because the truth is already inside the same closed system.
+
+"Did Ronaldo win the World Cup?" has no answer on any blockchain. The moment settlement depends on
+a real-world event, you need an oracle. CRE is the right tool; HIP-4 is not applicable.
+
 ## How the resolver workflow works
 
 A **cron timer** wakes the workflow every minute (configurable). It **reads the contract** to find
@@ -150,12 +163,35 @@ speed requirement.
 4. **Payout** — winners call `claim(id)` and receive their stake **plus a pro-rata share of the
    losing pool**, net of a protocol fee (default 2%, taken from the losing pool only).
 
-Safety properties enforced by the contract:
+### Parimutuel payout model
+
+This contract uses the same model as horse racing: your payout is not fixed when you place your
+bet — it depends on the final split between the two sides.
+
+```
+distributable = losingPool − (losingPool × feeBps / 10_000)
+yourPayout    = yourStake + (distributable × yourStake / totalWinningPool)
+```
+
+Example: Alice bets 1 ETH YES, Bob bets 2 ETH NO, Carol bets 1 ETH NO. Oracle says NO.
+Fee = 2%.
+
+- Losing pool = 1 ETH. Fee = 0.02 ETH. Distributable = 0.98 ETH.
+- Total NO pool = 3 ETH. Bob holds 2/3, Carol holds 1/3.
+- Bob gets: 2 ETH stake + (0.98 × 2/3) ≈ **2.653 ETH**
+- Carol gets: 1 ETH stake + (0.98 × 1/3) ≈ **1.327 ETH**
+
+Key rule: **the protocol fee is taken from the losing pool only.** Winners always receive their
+full stake back at minimum. If the winning side has zero bettors, or the outcome is `Invalid`,
+the market auto-voids and **everyone gets a full refund with zero fee**.
+
+### Safety properties enforced by the contract
 
 - Bets rejected at/after the trading deadline and once resolved.
-- A market whose **winning side has zero stake** auto-voids → both sides refundable.
-- `Invalid` outcome → full refunds, no fee.
-- `voidMarket()` owner safety valve if the oracle never resolves (only 7 days past `resolveTime`).
+- A market whose **winning side has zero stake** auto-voids → full refunds, zero fee.
+- `Invalid` outcome → full refunds, zero fee.
+- `voidMarket()` owner safety valve if the oracle *never* resolves — only callable 7+ days after
+  `resolveTime` so the owner can't use it to cancel a market with an unfavorable result.
 - `claim()` is `nonReentrant` and idempotent per user.
 
 Outcome codes shared between the workflow and contract: `Yes=1`, `No=2`, `Invalid=3`.
