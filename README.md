@@ -89,10 +89,44 @@ so there is no proposer, no disputer, no voting period — settlement lands in m
 | Failure mode | Unchallenged wrong answer wins | DON consensus fails → no settlement |
 | On-chain verification | Bond expiry | Signature verification by KeystoneForwarder |
 
-The tradeoff: with CRE the trust anchor is the **data source + the DON** rather than human
-arbitration. For production, point the workflow at a reputable, deterministic results feed and the
-official `KeystoneForwarder` — the relay normalizing API responses is the right place to hold API
-keys and ensure deterministic output so all DON nodes reach consensus.
+### Honest tradeoffs
+
+Neither model is unconditionally better — they have different failure modes and suit different risk
+profiles.
+
+**What CRE's DON consensus does protect against:**
+
+- A single node getting a network error or returning a stale response (consensus fails → no wrong
+  settlement)
+- A single compromised or malicious node forging an outcome (the quorum won't agree with it)
+- Anyone forging a report on-chain without the DON's private keys (the `KeystoneForwarder`
+  rejects it)
+
+**What CRE's DON consensus does NOT protect against:**
+
+- **The data source itself returning wrong data.** If the sports API sends the same incorrect
+  result to all 7 nodes, consensus passes on a wrong answer. The DON faithfully reports what it
+  saw — garbage in, garbage out.
+- A coordinated attack on a majority of DON nodes simultaneously.
+
+**What UMA protects against that CRE does not:**
+
+- Subtly ambiguous or disputed outcomes — UMA's human-vote mechanism can handle edge cases
+  ("the match was abandoned in extra time") that a deterministic API response can't capture.
+
+**The root tradeoff:**
+
+| | UMA | Chainlink CRE |
+|---|---|---|
+| Trust anchor | Human challengers + token-holder vote | Data source + DON node honesty |
+| Fails silently if | Nobody challenges a wrong answer | The data source lies uniformly |
+| Best suited for | Ambiguous, subjective, or rare outcomes | Objective, deterministic, frequent outcomes |
+| Speed | 2+ hours minimum | ~1 minute |
+
+For this use case — "did team X win the World Cup?" — the outcome is objective and universally
+reported, making CRE the right fit. For "was the project milestone actually delivered?", UMA's
+human arbitration is better. Choose your oracle based on the nature of the question, not just the
+speed requirement.
 
 ## Repository layout
 
