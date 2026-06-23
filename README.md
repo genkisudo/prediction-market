@@ -43,6 +43,57 @@ sign a report, and write it onchain** — exactly the trust model a prediction-m
 - **Tamper-evident payout.** The contract only accepts reports relayed by the `KeystoneForwarder`,
   so settlement can't be forged.
 
+## How the resolver workflow works
+
+A **cron timer** wakes the workflow every minute (configurable). It **reads the contract** to find
+markets whose `resolveTime` has passed but aren't settled yet, **fetches the real match result over
+HTTP** from a sports-data source, and then **every node in the Chainlink DON independently fetches
+that same result and must agree** on it (consensus). Once they agree, the DON **cryptographically
+signs** the outcome and **writes it back to the contract**, which flips the market to YES/NO and
+lets winners claim immediately.
+
+The five steps in order:
+
+1. **Cron fires.** Every node in the DON wakes on the schedule and asks: is anything resolvable
+   right now?
+2. **Read the contract.** `getResolvableMarkets()` returns all markets that are past their
+   `resolveTime` and still unresolved — returning their on-chain IDs and the off-chain `eventId`
+   keys.
+3. **Fetch and reach consensus.** For each market, every DON node independently fetches the match
+   result from the configured sports feed. The DON compares all nodes' answers using
+   `ConsensusAggregationByFields(...identical)` — every field must be identical across all nodes.
+   If even one node gets a different response (network error, stale data), consensus fails and that
+   market is skipped this tick.
+4. **Sign a report.** The DON encodes the `Resolution[]` batch (market IDs + outcome codes) and
+   collectively signs it — like a multi-signature from the quorum of DON nodes.
+5. **Write on-chain.** The signed report is submitted to the `KeystoneForwarder`, which verifies
+   the DON's signatures and forwards to `PredictionMarket.onReport`. Each market in the batch is
+   settled atomically in one transaction.
+
+### Why no UMA oracle is needed
+
+UMA's optimistic oracle works by *waiting*: someone **proposes** an answer, there is a **dispute
+window** (hours), and if anyone disputes, UMA token-holders **vote** over days — that delay is the
+"1–2 hours" optimistic case, or much longer if disputed. CRE flips the model entirely: instead of
+_"assume it's right unless someone challenges,"_ it **goes and gets the truth directly** — multiple
+independent nodes pull the verifiable result and only proceed on the value they all agree on. Trust
+comes from **decentralized fetching + cryptographic signatures, not from an economic dispute game**,
+so there is no proposer, no disputer, no voting period — settlement lands in minutes.
+
+| Property | UMA Optimistic Oracle | Chainlink CRE |
+|---|---|---|
+| Settlement time | 2+ hours (dispute window) | ~1 minute (next cron tick) |
+| Trust model | Economic (bonds + challengers) | Cryptographic (DON multi-sig) |
+| Manual intervention | Possible dispute resolution | None |
+| Data source | Any proposer + dispute | DON nodes fetch + consensus |
+| Failure mode | Unchallenged wrong answer wins | DON consensus fails → no settlement |
+| On-chain verification | Bond expiry | Signature verification by KeystoneForwarder |
+
+The tradeoff: with CRE the trust anchor is the **data source + the DON** rather than human
+arbitration. For production, point the workflow at a reputable, deterministic results feed and the
+official `KeystoneForwarder` — the relay normalizing API responses is the right place to hold API
+keys and ensure deterministic output so all DON nodes reach consensus.
+
 ## Repository layout
 
 | Path          | What it is                                                                 |
