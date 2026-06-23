@@ -1,0 +1,25 @@
+# dependencies
+node_modules/
+
+# secrets / env
+.env
+.env.local
+**/.env
+**/.env.local
+
+# foundry
+contracts/out/
+contracts/cache/
+contracts/broadcast/
+
+# cre / wasm build artifacts
+*.wasm
+**/.cre_build_tmp.*
+cre/**/dist/
+
+# next.js
+frontend/.next/
+frontend/next-env.d.ts
+
+# misc
+.DS_Store

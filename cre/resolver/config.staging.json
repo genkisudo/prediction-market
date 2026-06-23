@@ -1,0 +1,7 @@
+{
+  "schedule": "*/20 * * * * *",
+  "chainName": "ethereum-testnet-sepolia",
+  "marketContractAddress": "0x0000000000000000000000000000000000000000",
+  "apiBaseUrl": "http://localhost:8888",
+  "gasLimit": "2000000"
+}

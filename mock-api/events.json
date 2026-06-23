@@ -1,0 +1,23 @@
+{
+  "wc2026-ronaldo-champion": {
+    "title": "Will Ronaldo win his first World Cup?",
+    "status": "SETTLED",
+    "outcome": "NO",
+    "source": "https://api.football-data.org/v4/competitions/WC/standings",
+    "settledAt": "2026-07-19T22:00:00Z"
+  },
+  "wc2026-messi-argentina-final": {
+    "title": "Will Argentina reach the 2026 World Cup final?",
+    "status": "SETTLED",
+    "outcome": "YES",
+    "source": "https://api.football-data.org/v4/competitions/WC/matches",
+    "settledAt": "2026-07-15T22:00:00Z"
+  },
+  "wc2026-host-usa-quarterfinal": {
+    "title": "Will the USA reach the 2026 World Cup quarter-finals?",
+    "status": "PENDING",
+    "outcome": null,
+    "source": "https://api.football-data.org/v4/competitions/WC/matches",
+    "settledAt": null
+  }
+}

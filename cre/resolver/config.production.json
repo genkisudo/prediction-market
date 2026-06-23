@@ -1,0 +1,7 @@
+{
+  "schedule": "0 */1 * * * *",
+  "chainName": "ethereum-testnet-sepolia",
+  "marketContractAddress": "0x0000000000000000000000000000000000000000",
+  "apiBaseUrl": "https://your-sports-results-relay.example.com",
+  "gasLimit": "2000000"
+}

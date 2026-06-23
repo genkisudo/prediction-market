@@ -1,0 +1,10 @@
+{
+  "name": "wc-prediction-mock-api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Mock sports-results oracle data source for the CRE resolver workflow",
+  "scripts": {
+    "start": "node server.mjs"
+  }
+}
